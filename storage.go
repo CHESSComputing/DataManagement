@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 
-	srvConfig "github.com/CHESSComputing/common/config"
+	srvConfig "github.com/CHESSComputing/golib/config"
 	minio "github.com/minio/minio-go/v7"
 	credentials "github.com/minio/minio-go/v7/pkg/credentials"
 )

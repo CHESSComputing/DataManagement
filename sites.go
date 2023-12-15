@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	srvConfig "github.com/CHESSComputing/common/config"
+	srvConfig "github.com/CHESSComputing/golib/config"
 	minio "github.com/minio/minio-go/v7"
 	cryptoutils "github.com/vkuznet/cryptoutils"
 )

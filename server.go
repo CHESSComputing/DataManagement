@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	srvConfig "github.com/CHESSComputing/common/config"
+	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/gin-gonic/gin"
 )
 
