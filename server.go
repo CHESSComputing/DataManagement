@@ -9,6 +9,7 @@ import (
 )
 
 // examples: https://go.dev/doc/tutorial/web-service-gin
+var _routes gin.RoutesInfo
 
 // helper function to setup our server router
 func setupRouter() *gin.Engine {
@@ -17,6 +18,7 @@ func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	// GET routes
+	r.GET("apis", ApisHandler)
 	r.GET("/storage", StorageHandler)
 	r.GET("/storage/:site", SiteHandler)
 	r.GET("/storage/:site/:bucket", BucketHandler)
@@ -29,6 +31,8 @@ func setupRouter() *gin.Engine {
 	// DELETE routes
 	r.DELETE("/storage/:site/:bucket", BucketDeleteHandler)
 	r.DELETE("/storage/:site/:bucket/:object", FileDeleteHandler)
+
+	_routes = r.Routes()
 	return r
 }
 
