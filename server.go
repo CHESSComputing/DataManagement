@@ -5,37 +5,32 @@ import (
 	"log"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	server "github.com/CHESSComputing/golib/server"
 	"github.com/gin-gonic/gin"
 )
 
-// examples: https://go.dev/doc/tutorial/web-service-gin
-var _routes gin.RoutesInfo
-
 // helper function to setup our server router
 func setupRouter() *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
-	r := gin.Default()
+	routes := []server.Route{
+		server.Route{Method: "GET", Path: "/storage", Handler: StorageHandler, Authorized: true},
+		server.Route{Method: "GET", Path: "/storage/:site", Handler: SiteHandler, Authorized: true},
+		server.Route{Method: "GET", Path: "/storage/:site/:bucket", Handler: BucketHandler, Authorized: true},
+		server.Route{Method: "GET", Path: "/storage/:site/:bucket/:object", Handler: FileHandler, Authorized: true},
 
-	// GET routes
-	r.GET("apis", ApisHandler)
-	r.GET("/storage", StorageHandler)
-	r.GET("/storage/:site", SiteHandler)
-	r.GET("/storage/:site/:bucket", BucketHandler)
-	r.GET("/storage/:site/:bucket/:object", FileHandler)
+		server.Route{Method: "POST", Path: "/storage/:site/:bucket", Handler: BucketPostHandler, Authorized: true},
+		server.Route{Method: "POST", Path: "/storage/:site/:bucket/:object", Handler: FilePostHandler, Authorized: true},
 
-	// POST routes
-	r.POST("/storage/:site/:bucket", BucketPostHandler)
-	r.POST("/storage/:site/:bucket/:object", FilePostHandler)
-
-	// DELETE routes
-	r.DELETE("/storage/:site/:bucket", BucketDeleteHandler)
-	r.DELETE("/storage/:site/:bucket/:object", FileDeleteHandler)
-
-	_routes = r.Routes()
+		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket", Handler: BucketDeleteHandler, Authorized: true},
+		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket/:object", Handler: FileDeleteHandler, Authorized: true},
+	}
+	r := server.Router(routes, nil, "static",
+		srvConfig.Config.DataManagement.WebServer.Base,
+		srvConfig.Config.DataManagement.WebServer.Verbose,
+	)
 	return r
 }
 
+// Server defines our HTTP server
 func Server() {
 	r := setupRouter()
 	sport := fmt.Sprintf(":%d", srvConfig.Config.DataManagement.WebServer.Port)
