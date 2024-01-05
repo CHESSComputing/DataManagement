@@ -23,10 +23,7 @@ func setupRouter() *gin.Engine {
 		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket", Handler: BucketDeleteHandler, Authorized: true},
 		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket/:object", Handler: FileDeleteHandler, Authorized: true},
 	}
-	r := server.Router(routes, nil, "static",
-		srvConfig.Config.DataManagement.WebServer.Base,
-		srvConfig.Config.DataManagement.WebServer.Verbose,
-	)
+	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
 	return r
 }
 
