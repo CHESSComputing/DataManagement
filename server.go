@@ -1,5 +1,9 @@
 package main
 
+// server module
+//
+// Copyright (c) 2023 - Valentin Kuznetsov <vkuznet@gmail.com>
+//
 import (
 	"fmt"
 	"log"
@@ -24,6 +28,7 @@ func setupRouter() *gin.Engine {
 		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket/:object", Handler: FileDeleteHandler, Authorized: true},
 	}
 	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
+	r.Use(server.CounterMiddleware())
 	return r
 }
 
