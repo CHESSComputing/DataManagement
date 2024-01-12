@@ -21,14 +21,13 @@ func setupRouter() *gin.Engine {
 		server.Route{Method: "GET", Path: "/storage/:site/:bucket", Handler: BucketHandler, Authorized: true},
 		server.Route{Method: "GET", Path: "/storage/:site/:bucket/:object", Handler: FileHandler, Authorized: true},
 
-		server.Route{Method: "POST", Path: "/storage/:site/:bucket", Handler: BucketPostHandler, Authorized: true},
-		server.Route{Method: "POST", Path: "/storage/:site/:bucket/:object", Handler: FilePostHandler, Authorized: true},
+		server.Route{Method: "POST", Path: "/storage/:site/:bucket", Handler: BucketPostHandler, Authorized: true, Scope: "write"},
+		server.Route{Method: "POST", Path: "/storage/:site/:bucket/:object", Handler: FilePostHandler, Authorized: true, Scope: "write"},
 
-		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket", Handler: BucketDeleteHandler, Authorized: true},
-		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket/:object", Handler: FileDeleteHandler, Authorized: true},
+		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket", Handler: BucketDeleteHandler, Authorized: true, Scope: "delete"},
+		server.Route{Method: "DELETE", Path: "/storage/:site/:bucket/:object", Handler: FileDeleteHandler, Authorized: true, Scope: "delete"},
 	}
 	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
-	r.Use(server.CounterMiddleware())
 	return r
 }
 
