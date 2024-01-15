@@ -1,4 +1,9 @@
 # DataManagement Service
+
+![build status](https://github.com/CHESSComputing/DataManagement/actions/workflows/go.yml/badge.svg)
+[![go report card](https://goreportcard.com/badge/github.com/CHESSComputing/DataManagement)](https://goreportcard.com/report/github.com/CHESSComputing/DataManagement)
+[![godoc](https://godoc.org/github.com/CHESSComputing/DataManagement?status.svg)](https://godoc.org/github.com/CHESSComputing/DataManagement)
+
 Data Management for CHESSComputing provides RESTfull access to site's S3 storage.
 It supports the following (protected) APIs:
 ```
