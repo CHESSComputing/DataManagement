@@ -46,15 +46,33 @@ func s3client() (*minio.Client, error) {
 	return minioClient, err
 }
 
+// BucketObject represents s3 object
+type BucketObject struct {
+	Bucket  string             `json:"bucket"`
+	Objects []minio.ObjectInfo `json:"objects"`
+}
+
+// bucketContent provides content on given bucket
+func bucketContent(bucket string) (BucketObject, error) {
+	if srvConfig.Config.DataManagement.WebServer.Verbose > 0 {
+		log.Printf("looking for bucket:'%s'", bucket)
+	}
+	objects, err := listObjects(bucket)
+	if err != nil {
+		log.Printf("ERROR: unabel to list bucket '%s', error %v", bucket, err)
+	}
+	obj := BucketObject{
+		Bucket:  bucket,
+		Objects: objects,
+	}
+	return obj, nil
+}
+
 // helper function to provide list of buckets in S3 store
-func listBuckets(s3 S3) ([]minio.BucketInfo, error) {
+func listBuckets() ([]minio.BucketInfo, error) {
 	var out []minio.BucketInfo
 	ctx := context.Background()
-	// Initialize minio client object.
-	minioClient, err := minio.New(s3.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(s3.AccessKey, s3.AccessSecret, ""),
-		Secure: s3.UseSSL,
-	})
+	minioClient, err := s3client()
 	if err != nil {
 		log.Println("ERROR", err)
 		return out, err
@@ -65,14 +83,10 @@ func listBuckets(s3 S3) ([]minio.BucketInfo, error) {
 }
 
 // helper function to provide list of buckets in S3 store
-func listObjects(s3 S3, bucket string) ([]minio.ObjectInfo, error) {
+func listObjects(bucket string) ([]minio.ObjectInfo, error) {
 	var out []minio.ObjectInfo
 	ctx := context.Background()
-	// Initialize minio client object.
-	minioClient, err := minio.New(s3.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(s3.AccessKey, s3.AccessSecret, ""),
-		Secure: s3.UseSSL,
-	})
+	minioClient, err := s3client()
 	if err != nil {
 		log.Println("ERROR", err)
 		return out, err

@@ -32,8 +32,13 @@ curl http://localhost:8340/storage
 ```
 */
 func StorageHandler(c *gin.Context) {
-	data := []string{}
-	c.JSON(200, gin.H{"status": "ok", "data": data})
+	// get list of buckets
+	buckets, err := listBuckets()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "ok", "data": buckets})
 }
 
 // BucketHandler provides access to GET /storate/:bucket end-point
@@ -46,12 +51,12 @@ func BucketHandler(c *gin.Context) {
 	var params BucketParams
 	if err := c.ShouldBindUri(&params); err == nil {
 		if data, err := bucketContent(params.Bucket); err == nil {
-			c.JSON(200, gin.H{"status": "ok", "data": data})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "data": data})
 		} else {
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		}
 	} else {
-		c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 	}
 }
 
@@ -64,10 +69,10 @@ func FileHandler(c *gin.Context) {
 			c.Header("Content-Disposition", header)
 			c.Data(http.StatusOK, "application/octet-stream", data)
 		} else {
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		}
 	} else {
-		c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 	}
 }
 
@@ -84,12 +89,12 @@ func BucketPostHandler(c *gin.Context) {
 	if err := c.ShouldBindUri(&params); err == nil {
 		if err := createBucket(params.Bucket); err == nil {
 			msg := fmt.Sprintf("Bucket %s created successfully", params.Bucket)
-			c.JSON(200, gin.H{"status": "ok", "msg": msg})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		}
 	} else {
-		c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 	}
 }
 
@@ -108,7 +113,7 @@ func FilePostHandler(c *gin.Context) {
 		file, err := c.FormFile("file")
 		if err != nil {
 			log.Println("ERROR: fail to get file from HTTP form", err)
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 			return
 		}
 		log.Printf("INFO: uploading file %s", file.Filename)
@@ -117,7 +122,7 @@ func FilePostHandler(c *gin.Context) {
 		reader, err := file.Open()
 		if err != nil {
 			log.Println("ERROR: fail to open file", err)
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 			return
 		}
 		defer reader.Close()
@@ -131,14 +136,14 @@ func FilePostHandler(c *gin.Context) {
 			reader,
 			size); err == nil {
 			msg := fmt.Sprintf("File %s/%s uploaded successfully", params.Bucket, params.Object)
-			c.JSON(200, gin.H{"status": "ok", "msg": msg, "object": info})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg, "object": info})
 		} else {
 			log.Println("ERROR: fail to upload object", err)
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		}
 	} else {
 		log.Println("ERROR: fail to bind HTTP parameters", err)
-		c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 	}
 }
 
@@ -155,12 +160,12 @@ func BucketDeleteHandler(c *gin.Context) {
 	if err := c.ShouldBindUri(&params); err == nil {
 		if err := deleteBucket(params.Bucket); err == nil {
 			msg := fmt.Sprintf("Bucket %s deleted successfully", params.Bucket)
-			c.JSON(200, gin.H{"status": "ok", "msg": msg})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		}
 	} else {
-		c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 	}
 }
 
@@ -176,11 +181,11 @@ func FileDeleteHandler(c *gin.Context) {
 		var versionId string // TODO: in a future we may need to handle different version of objects
 		if err := deleteObject(params.Bucket, params.Object, versionId); err == nil {
 			msg := fmt.Sprintf("File %s/%s deleted successfully", params.Bucket, params.Object)
-			c.JSON(200, gin.H{"status": "ok", "msg": msg})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
-			c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		}
 	} else {
-		c.JSON(400, gin.H{"status": "fail", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 	}
 }
