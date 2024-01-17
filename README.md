@@ -5,9 +5,12 @@
 [![godoc](https://godoc.org/github.com/CHESSComputing/DataManagement?status.svg)](https://godoc.org/github.com/CHESSComputing/DataManagement)
 
 Data Management for CHESSComputing provides RESTfull access to site's S3 storage.
-### pre-requsite:
-- all operations except GET method requires write/delete tokens
-- in order to access DataManagement the MIN.IO server sohuld be up and runnig
+
+### Prerequisites
+- all operations requires token with appropriate scope, e.g. to get data we can
+  use read scope token, for posting (writing) the data we use token with write
+  scope, and for deletion token with delete scope
+- in order to access DataManagement service the MIN.IO server sohuld be up and runnig
   - the MIN.IO server should be configured with proper user account(s)
   - the access token and access secret should be created and placed under DataManagement.S3 section into foxden  configuration, e.g.
 ```
@@ -47,7 +50,8 @@ curl -v -H "Authorization: Bearer $token" \
     -F "file=@/path/test.zip"
 
 # get file
-curl http://localhost:8340/storage/s3-bucket/archive.zip > archive.zip
+curl -H "Authorization: Bearer $token" \
+    http://localhost:8340/storage/s3-bucket/archive.zip > archive.zip
 
 # delete file
 curl -v -H "Authorization: Bearer $token" \
