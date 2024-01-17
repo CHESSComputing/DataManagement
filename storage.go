@@ -22,16 +22,17 @@ type S3 struct {
 	UseSSL       bool
 }
 
-// helper function to get s3 minio client for given site
-func s3client(site string) (*minio.Client, error) {
-	// get s3 site object without any buckets info
-	s3, err := site2s3(site)
+// helper function to get s3 minio client
+func s3client() (*minio.Client, error) {
+	// get s3 object without any buckets info
+	s3 := S3{
+		Endpoint:     srvConfig.Config.DataManagement.S3.Endpoint,
+		AccessKey:    srvConfig.Config.DataManagement.S3.AccessKey,
+		AccessSecret: srvConfig.Config.DataManagement.S3.AccessSecret,
+		UseSSL:       srvConfig.Config.DataManagement.S3.UseSSL,
+	}
 	if srvConfig.Config.DataManagement.WebServer.Verbose > 1 {
 		log.Printf("INFO: s3 object %+v", s3)
-	}
-	if err != nil {
-		log.Printf("ERROR: unable to get S3 object for site %s, error %v", site, err)
-		return nil, err
 	}
 
 	// Initialize minio client object.
@@ -92,17 +93,17 @@ func listObjects(s3 S3, bucket string) ([]minio.ObjectInfo, error) {
 	return out, nil
 }
 
-// helper function to create new bucket in site's S3 store
-func createBucket(site, bucket string) error {
-	// get s3 site object without any buckets info
-	minioClient, err := s3client(site)
+// helper function to create new bucket in S3 store
+func createBucket(bucket string) error {
+	// get s3 object without any buckets info
+	minioClient, err := s3client()
 	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client for site %s, error %v", site, err)
+		log.Printf("ERROR: unable to initialize minio client, error %v", err)
 		return err
 	}
 	ctx := context.Background()
 
-	// create new bucket on site s3 storage
+	// create new bucket on s3 storage
 	//     err = minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{Region: location})
 	err = minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
 	if err != nil {
@@ -123,10 +124,10 @@ func createBucket(site, bucket string) error {
 	}
 	return err
 }
-func deleteBucket(site, bucket string) error {
-	minioClient, err := s3client(site)
+func deleteBucket(bucket string) error {
+	minioClient, err := s3client()
 	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client for site %s, error %v", site, err)
+		log.Printf("ERROR: unable to initialize minio client, error %v", err)
 		return err
 	}
 	ctx := context.Background()
@@ -137,11 +138,11 @@ func deleteBucket(site, bucket string) error {
 	return err
 }
 
-// helper function to upload given object to site's S3 store
-func uploadObject(site, bucket, objectName, contentType string, reader io.Reader, size int64) (minio.UploadInfo, error) {
-	minioClient, err := s3client(site)
+// helper function to upload given object to S3 store
+func uploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) (minio.UploadInfo, error) {
+	minioClient, err := s3client()
 	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client for site %s, error %v", site, err)
+		log.Printf("ERROR: unable to initialize minio client, error %v", err)
 		return minio.UploadInfo{}, err
 	}
 	ctx := context.Background()
@@ -168,11 +169,11 @@ func uploadObject(site, bucket, objectName, contentType string, reader io.Reader
 	return info, err
 }
 
-// helper function to delete object from site S3 storage
-func deleteObject(site, bucket, objectName, versionId string) error {
-	minioClient, err := s3client(site)
+// helper function to delete object from S3 storage
+func deleteObject(bucket, objectName, versionId string) error {
+	minioClient, err := s3client()
 	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client for site %s, error %v", site, err)
+		log.Printf("ERROR: unable to initialize minio client, error %v", err)
 		return err
 	}
 	ctx := context.Background()
@@ -196,11 +197,11 @@ func deleteObject(site, bucket, objectName, versionId string) error {
 	return err
 }
 
-// helper function to get given object from site's S3 storage
-func getObject(site, bucket, objectName string) ([]byte, error) {
-	minioClient, err := s3client(site)
+// helper function to get given object from S3 storage
+func getObject(bucket, objectName string) ([]byte, error) {
+	minioClient, err := s3client()
 	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client for site %s, error %v", site, err)
+		log.Printf("ERROR: unable to initialize minio client, error %v", err)
 		return []byte{}, err
 	}
 	ctx := context.Background()
