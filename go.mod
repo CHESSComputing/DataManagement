@@ -3,7 +3,7 @@ module github.com/CHESSComputing/DataManagement
 go 1.21.6
 
 require (
-	github.com/CHESSComputing/golib v0.1.0
+	github.com/CHESSComputing/golib v0.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/minio/minio-go/v7 v7.0.66
 )
