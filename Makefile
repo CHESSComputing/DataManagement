@@ -73,7 +73,7 @@ ifdef TAG
 endif
 	mv srv srv_arm64
 
-build_windows:
+build_windows_amd64:
 ifdef TAG
 	sed -i -e "s,{{VERSION}},$(TAG),g" main.go
 endif
