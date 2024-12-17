@@ -130,14 +130,9 @@ func FilePostHandler(c *gin.Context) {
 		size := file.Size
 		ctype := "" // TODO: decide on how to read content-type
 
-		if info, err := s3.UploadObject(
-			params.Bucket,
-			params.Object,
-			ctype,
-			reader,
-			size); err == nil {
+		if err := s3.UploadObject(params.Bucket, params.Object, ctype, reader, size); err == nil {
 			msg := fmt.Sprintf("File %s/%s uploaded successfully", params.Bucket, params.Object)
-			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg, "object": info})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
 			log.Println("ERROR: fail to upload object", err)
 			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
