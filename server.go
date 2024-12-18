@@ -5,10 +5,16 @@ package main
 // Copyright (c) 2023 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
 import (
+	"log"
+	"strings"
+
 	srvConfig "github.com/CHESSComputing/golib/config"
+	s3 "github.com/CHESSComputing/golib/s3"
 	server "github.com/CHESSComputing/golib/server"
 	"github.com/gin-gonic/gin"
 )
+
+var s3Client s3.S3Client
 
 // helper function to setup our server router
 func setupRouter() *gin.Engine {
@@ -29,6 +35,13 @@ func setupRouter() *gin.Engine {
 
 // Server defines our HTTP server
 func Server() {
+	// Initialize the appropriate S3 client.
+	var err error
+	s3Client, err = s3.InitializeS3Client(strings.ToLower(srvConfig.Config.S3.Name))
+	if err != nil {
+		log.Fatalf("Failed to initialize S3 client %s, error %v", srvConfig.Config.S3.Name, err)
+	}
+
 	// setup web router and start the service
 	r := setupRouter()
 	webServer := srvConfig.Config.DataManagement.WebServer

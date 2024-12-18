@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 
-	s3 "github.com/CHESSComputing/golib/s3"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,7 +33,7 @@ curl http://localhost:8340/storage
 */
 func StorageHandler(c *gin.Context) {
 	// get list of buckets
-	buckets, err := s3.ListBuckets()
+	buckets, err := s3Client.ListBuckets()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
 		return
@@ -51,7 +50,7 @@ curl http://localhost:8340/storage/s3-bucket/archive.zip > archive.zip
 func BucketHandler(c *gin.Context) {
 	var params BucketParams
 	if err := c.ShouldBindUri(&params); err == nil {
-		if data, err := s3.BucketContent(params.Bucket); err == nil {
+		if data, err := s3Client.BucketContent(params.Bucket); err == nil {
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "data": data})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "error": err.Error()})
@@ -65,7 +64,7 @@ func BucketHandler(c *gin.Context) {
 func FileHandler(c *gin.Context) {
 	var params ObjectParams
 	if err := c.ShouldBindUri(&params); err == nil {
-		if data, err := s3.GetObject(params.Bucket, params.Object); err == nil {
+		if data, err := s3Client.GetObject(params.Bucket, params.Object); err == nil {
 			header := fmt.Sprintf("attachment; filename=%s", params.Object)
 			c.Header("Content-Disposition", header)
 			c.Data(http.StatusOK, "application/octet-stream", data)
@@ -88,7 +87,7 @@ curl -X POST http://localhost:8340/storage/s3-bucket
 func BucketPostHandler(c *gin.Context) {
 	var params BucketParams
 	if err := c.ShouldBindUri(&params); err == nil {
-		if err := s3.CreateBucket(params.Bucket); err == nil {
+		if err := s3Client.CreateBucket(params.Bucket); err == nil {
 			msg := fmt.Sprintf("Bucket %s created successfully", params.Bucket)
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
@@ -130,7 +129,7 @@ func FilePostHandler(c *gin.Context) {
 		size := file.Size
 		ctype := "" // TODO: decide on how to read content-type
 
-		if err := s3.UploadObject(params.Bucket, params.Object, ctype, reader, size); err == nil {
+		if err := s3Client.UploadObject(params.Bucket, params.Object, ctype, reader, size); err == nil {
 			msg := fmt.Sprintf("File %s/%s uploaded successfully", params.Bucket, params.Object)
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
@@ -154,7 +153,7 @@ curl -X DELETE http://localhost:8340/storage/s3-bucket
 func BucketDeleteHandler(c *gin.Context) {
 	var params BucketParams
 	if err := c.ShouldBindUri(&params); err == nil {
-		if err := s3.DeleteBucket(params.Bucket); err == nil {
+		if err := s3Client.DeleteBucket(params.Bucket); err == nil {
 			msg := fmt.Sprintf("Bucket %s deleted successfully", params.Bucket)
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
@@ -175,7 +174,7 @@ func FileDeleteHandler(c *gin.Context) {
 	var params ObjectParams
 	if err := c.ShouldBindUri(&params); err == nil {
 		var versionId string // TODO: in a future we may need to handle different version of objects
-		if err := s3.DeleteObject(params.Bucket, params.Object, versionId); err == nil {
+		if err := s3Client.DeleteObject(params.Bucket, params.Object, versionId); err == nil {
 			msg := fmt.Sprintf("File %s/%s deleted successfully", params.Bucket, params.Object)
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "msg": msg})
 		} else {
