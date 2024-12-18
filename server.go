@@ -37,7 +37,7 @@ func setupRouter() *gin.Engine {
 func Server() {
 	// Initialize the appropriate S3 client.
 	var err error
-	s3Client, err = s3.InitializeS3Client(strings.ToLower(srvConfig.Config.S3.Name))
+	s3Client, err = s3.InitializeS3Client(strings.ToLower(srvConfig.Config.DataManagement.S3.Name))
 	if err != nil {
 		log.Fatalf("Failed to initialize S3 client %s, error %v", srvConfig.Config.S3.Name, err)
 	}
