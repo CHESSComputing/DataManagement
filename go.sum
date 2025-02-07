@@ -1,7 +1,7 @@
 cloud.google.com/go/compute/metadata v0.3.0 h1:Tz+eQXMEqDIKRsmY3cHTL6FVaynIjX2QxYC4trgAKZc=
 cloud.google.com/go/compute/metadata v0.3.0/go.mod h1:zFmK7XCadkQkj6TtorcaGlCW1hT1fIilQDwofLpJ20k=
-github.com/CHESSComputing/golib v0.6.4 h1:h76d3TMb2kLmyRznmZCbrtJDoC9bFOoIo+Ruv0YuyT8=
-github.com/CHESSComputing/golib v0.6.4/go.mod h1:Kstol3B5dm9jDSFeE5R4urX2XL2thE/YFd02I9HNE5E=
+github.com/CHESSComputing/golib v0.6.5 h1:1Zw3ngahBkQ06blLegEjy/MEaU19YCUl8HUIkzSFVVM=
+github.com/CHESSComputing/golib v0.6.5/go.mod h1:Kstol3B5dm9jDSFeE5R4urX2XL2thE/YFd02I9HNE5E=
 github.com/aws/aws-sdk-go v1.55.5 h1:KKUZBfBoyqy5d3swXyiC7Q76ic40rYcbqH7qjh59kzU=
 github.com/aws/aws-sdk-go v1.55.5/go.mod h1:eRwEWoyTWFMVYVQzKMNHWP5/RV4xIUGMQfXQHfHkpNU=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=
