@@ -18,16 +18,39 @@ var s3Client s3.S3Client
 
 // helper function to setup our server router
 func setupRouter() *gin.Engine {
+	if srvConfig.Config.DataManagement.S3.Name != "" {
+		return setupS3Router()
+	}
+	return setupFSRouter()
+}
+
+// helper function to setup server router for S3 backend
+func setupS3Router() *gin.Engine {
 	routes := []server.Route{
-		server.Route{Method: "GET", Path: "/storage", Handler: StorageHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/storage/:bucket", Handler: BucketHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/storage/:bucket/:object", Handler: FileHandler, Authorized: true},
+		server.Route{Method: "GET", Path: "/storage", Handler: S3StorageHandler, Authorized: true},
+		server.Route{Method: "GET", Path: "/storage/:bucket/:object", Handler: S3StorageHandler, Authorized: true},
 
-		server.Route{Method: "POST", Path: "/storage/:bucket", Handler: BucketPostHandler, Authorized: true, Scope: "write"},
-		server.Route{Method: "POST", Path: "/storage/:bucket/:object", Handler: FilePostHandler, Authorized: true, Scope: "write"},
+		server.Route{Method: "POST", Path: "/storage/:bucket", Handler: S3PostHandler, Authorized: true, Scope: "write"},
+		server.Route{Method: "POST", Path: "/storage/:bucket/:object", Handler: S3PostHandler, Authorized: true, Scope: "write"},
 
-		server.Route{Method: "DELETE", Path: "/storage/:bucket", Handler: BucketDeleteHandler, Authorized: true, Scope: "delete"},
-		server.Route{Method: "DELETE", Path: "/storage/:bucket/:object", Handler: FileDeleteHandler, Authorized: true, Scope: "delete"},
+		server.Route{Method: "DELETE", Path: "/storage/:bucket", Handler: S3DeleteHandler, Authorized: true, Scope: "delete"},
+		server.Route{Method: "DELETE", Path: "/storage/:bucket/:object", Handler: S3DeleteHandler, Authorized: true, Scope: "delete"},
+	}
+	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
+	return r
+}
+
+// helper function to setup our server router for file-system backend
+func setupFSRouter() *gin.Engine {
+	routes := []server.Route{
+		server.Route{Method: "GET", Path: "/storage", Handler: FsStorageHandler, Authorized: true},
+		server.Route{Method: "GET", Path: "/storage/:dir/:file", Handler: FsStorageHandler, Authorized: true},
+
+		server.Route{Method: "POST", Path: "/storage/:dir", Handler: FsPostHandler, Authorized: true, Scope: "write"},
+		server.Route{Method: "POST", Path: "/storage/:dir/:file", Handler: FsPostHandler, Authorized: true, Scope: "write"},
+
+		server.Route{Method: "DELETE", Path: "/storage/:dir", Handler: FsDeleteHandler, Authorized: true, Scope: "delete"},
+		server.Route{Method: "DELETE", Path: "/storage/:dir/:file", Handler: FsDeleteHandler, Authorized: true, Scope: "delete"},
 	}
 	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
 	return r
