@@ -1,17 +1,27 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
+
+// Metadata represents file metadata information
+type Metadata struct {
+	Name        string    `json:"name"`
+	Size        int64     `json:"size"`
+	ModTime     time.Time `json:"mod_time"`
+	IsDirectory bool      `json:"is_directory"`
+}
 
 // FsClient represents generic interface to communicate with FileSystem instances
 type FsClient interface {
 	Get(dir, file string) ([]byte, error)
-	List(dir string) ([]string, error)
+	List(dir string) ([]Metadata, error)
 	Create(dir string) error
 	Upload(dir, file, ctype string, reader io.Reader, size int64) error
 	Delete(dir, file string) error
@@ -20,49 +30,75 @@ type FsClient interface {
 // LocalFsClient provides local file system implementation of FsClient
 type LocalFsClient struct {
 	Storage string
+	Logger  *log.Logger
+}
+
+// NewLocalFsClient creates a new LocalFsClient with logging enabled
+func NewLocalFsClient(storage string) *LocalFsClient {
+	return &LocalFsClient{
+		Storage: storage,
+		Logger:  log.New(os.Stdout, "FsClient: ", log.LstdFlags),
+	}
 }
 
 // Get retrieves a file's content or lists directory contents if file is empty
 func (l *LocalFsClient) Get(dir, file string) ([]byte, error) {
 	path := filepath.Join(l.Storage, dir)
 
-	// If file is empty, list directory contents
+	// If file is empty, return directory metadata
 	if file == "" {
 		files, err := l.List(dir)
 		if err != nil {
+			l.Logger.Printf("Error listing directory %s: %v", dir, err)
 			return nil, err
 		}
-		return []byte(fmt.Sprintf("Directory contents: %v", files)), nil
+		data, _ := json.MarshalIndent(files, "", "  ")
+		return data, nil
 	}
 
 	// Otherwise, read the file
 	path = filepath.Join(path, file)
 	data, err := os.ReadFile(path)
 	if err != nil {
+		l.Logger.Printf("Error reading file %s: %v", path, err)
 		return nil, err
 	}
+	l.Logger.Printf("Read file %s successfully", path)
 	return data, nil
 }
 
-// List retrieves the list of files in the given directory
-func (l *LocalFsClient) List(dir string) ([]string, error) {
+// List retrieves metadata for all files in a given directory
+func (l *LocalFsClient) List(dir string) ([]Metadata, error) {
 	path := filepath.Join(l.Storage, dir)
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
+		l.Logger.Printf("Failed to list directory %s: %v", path, err)
 		return nil, err
 	}
 
-	var fileNames []string
+	var metadataList []Metadata
 	for _, file := range files {
-		fileNames = append(fileNames, file.Name())
+		metadataList = append(metadataList, Metadata{
+			Name:        file.Name(),
+			Size:        file.Size(),
+			ModTime:     file.ModTime(),
+			IsDirectory: file.IsDir(),
+		})
 	}
-	return fileNames, nil
+	l.Logger.Printf("Listed directory %s", path)
+	return metadataList, nil
 }
 
 // Create creates a new directory
 func (l *LocalFsClient) Create(dir string) error {
 	path := filepath.Join(l.Storage, dir)
-	return os.MkdirAll(path, os.ModePerm)
+	err := os.MkdirAll(path, os.ModePerm)
+	if err == nil {
+		l.Logger.Printf("Created directory %s", path)
+	} else {
+		l.Logger.Printf("Failed to create directory %s: %v", path, err)
+	}
+	return err
 }
 
 // Upload writes data to a file in chunks to handle large files efficiently
@@ -71,12 +107,14 @@ func (l *LocalFsClient) Upload(dir, file, ctype string, reader io.Reader, size i
 
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil {
+		l.Logger.Printf("Failed to create directory for file %s: %v", path, err)
 		return err
 	}
 
 	// Open the file for writing
 	outFile, err := os.Create(path)
 	if err != nil {
+		l.Logger.Printf("Failed to create file %s: %v", path, err)
 		return err
 	}
 	defer outFile.Close()
@@ -84,6 +122,11 @@ func (l *LocalFsClient) Upload(dir, file, ctype string, reader io.Reader, size i
 	// Copy data from reader to file using buffer
 	buffer := make([]byte, 4096) // 4KB buffer
 	_, err = io.CopyBuffer(outFile, reader, buffer)
+	if err == nil {
+		l.Logger.Printf("Uploaded file %s successfully", path)
+	} else {
+		l.Logger.Printf("Failed to upload file %s: %v", path, err)
+	}
 	return err
 }
 
@@ -93,18 +136,30 @@ func (l *LocalFsClient) Delete(dir, file string) error {
 
 	// If file is empty, delete the entire directory
 	if file == "" {
-		return os.RemoveAll(path)
+		err := os.RemoveAll(path)
+		if err == nil {
+			l.Logger.Printf("Deleted directory %s", path)
+		} else {
+			l.Logger.Printf("Failed to delete directory %s: %v", path, err)
+		}
+		return err
 	}
 
 	// Otherwise, delete the specific file
 	path = filepath.Join(path, file)
-	return os.Remove(path)
+	err := os.Remove(path)
+	if err == nil {
+		l.Logger.Printf("Deleted file %s", path)
+	} else {
+		l.Logger.Printf("Failed to delete file %s: %v", path, err)
+	}
+	return err
 }
 
 /*
 // Example usage
 func main() {
-	client := &LocalFsClient{Storage: "./data"}
+	client := NewLocalFsClient("./data")
 
 	// Create directory
 	err := client.Create("testdir")
@@ -119,10 +174,10 @@ func main() {
 		fmt.Println("Error uploading file:", err)
 	}
 
-	// Get directory contents
+	// Get directory metadata
 	data, err := client.Get("testdir", "")
 	if err != nil {
-		fmt.Println("Error getting directory content:", err)
+		fmt.Println("Error getting directory metadata:", err)
 	} else {
 		fmt.Println(string(data))
 	}
