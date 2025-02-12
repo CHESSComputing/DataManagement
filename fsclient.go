@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -21,9 +22,21 @@ type LocalFsClient struct {
 	Storage string
 }
 
-// Get retrieves a file from the given directory
+// Get retrieves a file's content or lists directory contents if file is empty
 func (l *LocalFsClient) Get(dir, file string) ([]byte, error) {
-	path := filepath.Join(l.Storage, dir, file)
+	path := filepath.Join(l.Storage, dir)
+
+	// If file is empty, list directory contents
+	if file == "" {
+		files, err := l.List(dir)
+		if err != nil {
+			return nil, err
+		}
+		return []byte(fmt.Sprintf("Directory contents: %v", files)), nil
+	}
+
+	// Otherwise, read the file
+	path = filepath.Join(path, file)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -41,9 +54,7 @@ func (l *LocalFsClient) List(dir string) ([]string, error) {
 
 	var fileNames []string
 	for _, file := range files {
-		if !file.IsDir() {
-			fileNames = append(fileNames, file.Name())
-		}
+		fileNames = append(fileNames, file.Name())
 	}
 	return fileNames, nil
 }
@@ -76,9 +87,17 @@ func (l *LocalFsClient) Upload(dir, file, ctype string, reader io.Reader, size i
 	return err
 }
 
-// Delete removes a file from the given directory
+// Delete removes a file or an entire directory if file is empty
 func (l *LocalFsClient) Delete(dir, file string) error {
-	path := filepath.Join(l.Storage, dir, file)
+	path := filepath.Join(l.Storage, dir)
+
+	// If file is empty, delete the entire directory
+	if file == "" {
+		return os.RemoveAll(path)
+	}
+
+	// Otherwise, delete the specific file
+	path = filepath.Join(path, file)
 	return os.Remove(path)
 }
 
@@ -100,26 +119,18 @@ func main() {
 		fmt.Println("Error uploading file:", err)
 	}
 
-	// List files
-	files, err := client.List("testdir")
+	// Get directory contents
+	data, err := client.Get("testdir", "")
 	if err != nil {
-		fmt.Println("Error listing files:", err)
+		fmt.Println("Error getting directory content:", err)
 	} else {
-		fmt.Println("Files:", files)
+		fmt.Println(string(data))
 	}
 
-	// Get file
-	data, err := client.Get("testdir", "hello.txt")
+	// Delete directory
+	err = client.Delete("testdir", "")
 	if err != nil {
-		fmt.Println("Error getting file:", err)
-	} else {
-		fmt.Println("File content:", string(data))
-	}
-
-	// Delete file
-	err = client.Delete("testdir", "hello.txt")
-	if err != nil {
-		fmt.Println("Error deleting file:", err)
+		fmt.Println("Error deleting directory:", err)
 	}
 }
 */
