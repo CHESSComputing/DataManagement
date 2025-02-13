@@ -27,6 +27,7 @@ func setupRouter() *gin.Engine {
 // helper function to setup server router for S3 backend
 func setupS3Router() *gin.Engine {
 	routes := []server.Route{
+		server.Route{Method: "GET", Path: "/data", Handler: DataLocationHandler, Authorized: true},
 		server.Route{Method: "GET", Path: "/storage", Handler: S3StorageHandler, Authorized: true},
 		server.Route{Method: "GET", Path: "/storage/:bucket/:object", Handler: S3StorageHandler, Authorized: true},
 
@@ -43,6 +44,7 @@ func setupS3Router() *gin.Engine {
 // helper function to setup our server router for file-system backend
 func setupFSRouter() *gin.Engine {
 	routes := []server.Route{
+		server.Route{Method: "GET", Path: "/data", Handler: DataLocationHandler, Authorized: true},
 		server.Route{Method: "GET", Path: "/storage", Handler: FsStorageHandler, Authorized: true},
 		server.Route{Method: "GET", Path: "/storage/:dir/:file", Handler: FsStorageHandler, Authorized: true},
 
