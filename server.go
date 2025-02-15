@@ -5,6 +5,7 @@ package main
 // Copyright (c) 2023 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -70,5 +71,15 @@ func Server() {
 	// setup web router and start the service
 	r := setupRouter()
 	webServer := srvConfig.Config.DataManagement.WebServer
+
+	// Load HTML templates
+	sdir := webServer.StaticDir
+	if sdir == "" {
+		sdir = "static"
+	}
+	pat := fmt.Sprintf("%s/templates/*", sdir)
+	r.LoadHTMLGlob(pat)
+
+	// start web server
 	server.StartServer(r, webServer)
 }

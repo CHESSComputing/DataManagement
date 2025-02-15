@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"path/filepath"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ func DataLocationHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "missing did parameter"})
 		return
 	}
+	sdir := c.Query("sdir")
 
 	// Find metadata record for given DID
 	meta, err := findMetaDataRecord(did)
@@ -28,24 +30,43 @@ func DataLocationHandler(c *gin.Context) {
 	for _, attr := range srvConfig.Config.CHESSMetaData.DataLocationAttributes {
 		if val, ok := meta[attr]; ok {
 			// if location attribute is found redirect to it
-			dataLocation := val.(string)
-			// if location is individual file
-			//             c.File(dataLocation)
+			path := val.(string)
+			// join path from meta-data record with possible sdir
+			if sdir != "" {
+				path = filepath.Join(path, sdir)
+			}
 
-			// If location is a directory, list its contents
-			files, err := os.ReadDir(dataLocation)
+			// get info about our path
+			info, err := os.Stat(path)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to list directory contents"})
+				c.JSON(http.StatusNotFound, gin.H{"error": "path not found"})
 				return
 			}
 
-			// Collect file names
-			var fileNames []string
-			for _, file := range files {
-				fileNames = append(fileNames, file.Name())
+			// If requesting JSON, return directory listing in JSON format
+			acceptHeader := c.GetHeader("Accept")
+			if info.IsDir() {
+				entries, err := getFileList(path)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot read directory"})
+					return
+				}
+
+				if acceptHeader == "application/json" {
+					c.JSON(http.StatusOK, entries)
+					return
+				}
+
+				// Render HTML template
+				c.HTML(http.StatusOK, "fs.tmpl", gin.H{
+					"Path":    path,
+					"Entries": entries,
+				})
+				return
 			}
 
-			c.JSON(http.StatusOK, gin.H{"directory": dataLocation, "files": fileNames})
+			// Serve file content if it's a file
+			http.ServeFile(c.Writer, c.Request, path)
 			return
 		}
 	}

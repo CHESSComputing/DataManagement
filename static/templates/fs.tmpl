@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Browser</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .directory { font-weight: bold; color: blue; cursor: pointer; }
+        .file { color: black; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Browsing: {{ .Path }}</h2>
+    <ul>
+        {{ range .Entries }}
+            <li>
+                {{ if .IsDir }}
+                    <span class="directory" data-path="{{ .Path }}">{{ .Name }}/</span>
+                {{ else }}
+                    <a href="/fs?path={{ .Path }}" class="file">{{ .Name }}</a>
+                {{ end }}
+            </li>
+        {{ end }}
+    </ul>
+
+    <script>
+        $(document).ready(function() {
+            $(".directory").click(function() {
+                let path = $(this).data("path");
+                window.location.href = "/fs?path=" + encodeURIComponent(path);
+            });
+        });
+    </script>
+</body>
+</html>
+
