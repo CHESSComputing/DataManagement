@@ -3,9 +3,39 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	services "github.com/CHESSComputing/golib/services"
 )
+
+// FileEntry represents a directory entry
+type FileEntry struct {
+	Name  string `json:"name"`
+	IsDir bool   `json:"is_dir"`
+	Path  string `json:"path"`
+}
+
+// getFileList returns a list of files and directories in the given path
+func getFileList(path string) ([]FileEntry, error) {
+	var entries []FileEntry
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		entry := FileEntry{
+			Name:  file.Name(),
+			IsDir: file.IsDir(),
+			Path:  filepath.Join(path, file.Name()),
+		}
+		entries = append(entries, entry)
+	}
+
+	return entries, nil
+}
 
 // helper function to find meta-data record for given did
 func findMetaDataRecord(did string) (map[string]any, error) {
