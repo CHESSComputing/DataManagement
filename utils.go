@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -11,13 +12,15 @@ import (
 
 // FileEntry represents a directory entry
 type FileEntry struct {
-	Name  string `json:"name"`
-	IsDir bool   `json:"is_dir"`
-	Path  string `json:"path"`
+	Did    string `json:"did"`
+	EscDid string `json:"esc_did"`
+	Name   string `json:"name"`
+	IsDir  bool   `json:"is_dir"`
+	Path   string `json:"path"` // path here correspond to sub-path within raw location area
 }
 
 // getFileList returns a list of files and directories in the given path
-func getFileList(path string) ([]FileEntry, error) {
+func getFileList(did, path, spath string) ([]FileEntry, error) {
 	var entries []FileEntry
 
 	files, err := os.ReadDir(path)
@@ -27,9 +30,12 @@ func getFileList(path string) ([]FileEntry, error) {
 
 	for _, file := range files {
 		entry := FileEntry{
-			Name:  file.Name(),
-			IsDir: file.IsDir(),
-			Path:  filepath.Join(path, file.Name()),
+			Did:    did,
+			EscDid: url.QueryEscape(did),
+			Name:   file.Name(),
+			IsDir:  file.IsDir(),
+			Path:   filepath.Join(spath, file.Name()),
+			//             Path:   filepath.Join(path, file.Name()),
 		}
 		entries = append(entries, entry)
 	}

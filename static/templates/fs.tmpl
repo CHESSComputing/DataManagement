@@ -7,32 +7,28 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; }
+        ul {list-style: none; /* Remove default bullets */ padding-left: 0;}
         .directory { font-weight: bold; color: blue; cursor: pointer; }
         .file { color: black; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h2>Browsing: {{ .Path }}</h2>
+    <h2>DID: {{ .Did }}</h2>
+    <h2>Data location: {{ .Area }}</h2>
     <ul>
         {{ range .Entries }}
+            {{/* Entries is a struct {Path, Name, isDir, Did, EscDid} */}}
             <li>
                 {{ if .IsDir }}
-                    <span class="directory" data-path="{{ .Path }}">{{ .Name }}/</span>
+                    <img src="https://cdn.onlinewebfonts.com/svg/img_572115.png" width="20">
+                    <a href="/dm?did={{.EscDid}}&path={{.Path}}" class="directory">{{ .Name }}</a>
                 {{ else }}
-                    <a href="/fs?path={{ .Path }}" class="file">{{ .Name }}</a>
+                    <img src="https://cdn.onlinewebfonts.com/svg/img_547367.png" width="20">
+                    <a href="/dm?did={{.EscDid}}&file={{.Name}}" class="file">{{ .Name }}</a>
                 {{ end }}
             </li>
         {{ end }}
     </ul>
-
-    <script>
-        $(document).ready(function() {
-            $(".directory").click(function() {
-                let path = $(this).data("path");
-                window.location.href = "/fs?path=" + encodeURIComponent(path);
-            });
-        });
-    </script>
 </body>
 </html>
 

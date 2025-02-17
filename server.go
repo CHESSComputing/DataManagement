@@ -5,6 +5,7 @@ package main
 // Copyright (c) 2023 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
 import (
+	"embed"
 	"fmt"
 	"log"
 	"strings"
@@ -15,6 +16,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// content is our static web server content.
+//
+//go:embed static
+var StaticFs embed.FS
+
+// our s3 client
 var s3Client s3.S3Client
 
 // helper function to setup our server router
