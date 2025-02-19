@@ -1,34 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Browser</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        ul {list-style: none; /* Remove default bullets */ padding-left: 0;}
-        .directory { font-weight: bold; color: blue; cursor: pointer; }
-        .file { color: black; cursor: pointer; }
-    </style>
-</head>
-<body>
+<section>
+    <article id="article">
     <h2>DID: {{ .Did }}</h2>
-    <h2>Data location: {{ .Area }}</h2>
-    <ul>
+    Data location: {{ .Area }}
+    <ul style="list-style: none;padding-left: 0;">
         {{ range .Entries }}
             {{/* Entries is a struct {Path, Name, isDir, Did, EscDid} */}}
             <li>
                 {{ if .IsDir }}
                     <img src="https://cdn.onlinewebfonts.com/svg/img_572115.png" width="20">
-                    <a href="/dm?did={{.EscDid}}&path={{.Path}}" class="directory">{{ .Name }}</a>
+                    <a href="/dm?did={{.EscDid}}&path={{.Path}}" style="font-weight: bold; color: blue; cursor: pointer;">{{ .Name }}</a>
                 {{ else }}
                     <img src="https://cdn.onlinewebfonts.com/svg/img_547367.png" width="20">
-                    <a href="/dm?did={{.EscDid}}&file={{.Name}}" class="file">{{ .Name }}</a>
+                    <a href="/dm?did={{.EscDid}}&file={{.Name}}" style="color: black; cursor: pointer;">{{ .Name }}</a>
                 {{ end }}
             </li>
         {{ end }}
     </ul>
-</body>
-</html>
 
+    </article>
+</section>

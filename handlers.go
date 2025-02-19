@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -46,7 +45,6 @@ func DataLocationHandler(c *gin.Context) {
 			// if we have file name we should present it back to upstream caller
 			if fileName != "" {
 				fname := filepath.Join(path, fileName)
-				log.Println("### serve file", fname)
 				// Serve file content if it's a file
 				http.ServeFile(c.Writer, c.Request, fname)
 				return
@@ -81,7 +79,8 @@ func DataLocationHandler(c *gin.Context) {
 				tmpl["Entries"] = entries
 				tmpl["Did"] = did
 				content := server.TmplPage(StaticFs, "fs.tmpl", tmpl)
-				c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(content))
+				page := server.Header(StaticFs, base) + content + server.FooterEmpty(StaticFs, base)
+				c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(page))
 				return
 			}
 
