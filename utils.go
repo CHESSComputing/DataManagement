@@ -3,10 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
+	srvConfig "github.com/CHESSComputing/golib/config"
 	services "github.com/CHESSComputing/golib/services"
 )
 
@@ -59,4 +63,46 @@ func findMetaDataRecord(did string) (map[string]any, error) {
 		return rec, errors.New(msg)
 	}
 	return records[0], nil
+}
+
+// findFiles recursively finds all files in idir matching the given pattern pat.
+func findFiles(idir string, pat string) ([]string, error) {
+	if !strings.HasSuffix(idir, "/") {
+		idir += "/"
+	}
+	var files []string
+
+	// Compile the regex pattern
+	re, err := regexp.Compile(pat)
+	if err != nil {
+		return nil, fmt.Errorf("invalid regex pattern: %v", err)
+	}
+
+	// Walk through the directory
+	err = filepath.Walk(idir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Println("WARNING:", err)
+			//             return err
+		}
+
+		// Check if it's a regular file and matches the pattern
+		if !info.IsDir() && re.MatchString(info.Name()) {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	//     if err != nil {
+	//         return nil, err
+	//     }
+
+	return files, err
+}
+
+// helper function to return list of supported file extensions
+func fileExtensions() []string {
+	if len(srvConfig.Config.DataManagement.FileExtensions) > 0 {
+		return srvConfig.Config.DataManagement.FileExtensions
+	}
+	return []string{"png", "jpg", "tiff"}
 }
