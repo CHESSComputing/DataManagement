@@ -5,6 +5,7 @@
     <form class="form-content" method="post" action="{{.Base}}/dmfiles">
         Find files:
         &nbsp;
+        <input type="hidden" name="did" value="{{.Did}}">
         <select style="height:31px" name="ext">
         {{range $val := .FileExtensions}}
             <option value="(?i)\.{{$val}}$">{{$val}}</option>
