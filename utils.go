@@ -82,7 +82,6 @@ func findFiles(idir string, pat string) ([]string, error) {
 	err = filepath.Walk(idir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Println("WARNING:", err)
-			//             return err
 		}
 
 		// Check if it's a regular file and matches the pattern
@@ -92,17 +91,46 @@ func findFiles(idir string, pat string) ([]string, error) {
 		return nil
 	})
 
-	//     if err != nil {
-	//         return nil, err
-	//     }
-
 	return files, err
 }
 
-// helper function to return list of supported file extensions
-func fileExtensions() []string {
-	if len(srvConfig.Config.DataManagement.FileExtensions) > 0 {
-		return srvConfig.Config.DataManagement.FileExtensions
+// fileExtensions finds all unique file extensions in the given directory and subdirectories.
+func fileExtensions(idir string) []string {
+	if !strings.HasSuffix(idir, "/") {
+		idir += "/"
 	}
-	return []string{"png", "jpg", "tiff"}
+	extMap := make(map[string]bool)
+
+	// Walk through the directory
+	err := filepath.Walk(idir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Println("WARNING: filepath.Walk", err.Error())
+		}
+
+		// Check if it's a file
+		if !info.IsDir() {
+			ext := filepath.Ext(info.Name()) // Extract file extension
+			if ext != "" {
+				extMap[ext] = true // Store unique extensions
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Println("WARNING: filepath.Walk", err.Error())
+		// return default list of file extensions
+		if len(srvConfig.Config.DataManagement.FileExtensions) > 0 {
+			return srvConfig.Config.DataManagement.FileExtensions
+		}
+		return []string{"png", "jpg", "tiff", "mcs"}
+	}
+
+	// Convert map keys to a slice
+	var extensions []string
+	for ext := range extMap {
+		extensions = append(extensions, ext)
+	}
+
+	return extensions
 }

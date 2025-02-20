@@ -80,7 +80,7 @@ func DataLocationHandler(c *gin.Context) {
 				tmpl["Area"] = path
 				tmpl["Entries"] = entries
 				tmpl["Did"] = did
-				tmpl["FileExtensions"] = fileExtensions()
+				tmpl["FileExtensions"] = fileExtensions(path)
 				content := server.TmplPage(StaticFs, "fs.tmpl", tmpl)
 				page := server.Header(StaticFs, base) + content + server.FooterEmpty(StaticFs, base)
 				c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(page))
