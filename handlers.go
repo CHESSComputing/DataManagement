@@ -131,7 +131,7 @@ func DataFilesHandler(c *gin.Context) {
 			// find all files in that location using our pattern
 			files, err := findFiles(path, pattern)
 			if err != nil {
-				log.Println("WARNING: findFiles error", err)
+				log.Println("WARNING: findFiles", err)
 				//                 c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				//                 return
 			}

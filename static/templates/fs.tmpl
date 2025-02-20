@@ -1,27 +1,19 @@
 <section>
     <article id="article">
-    <h2>DID: {{ .Did }}</h2>
+    <h4>DID: {{ .Did }}</h4>
     Data location: {{ .Area }}
     <form class="form-content" method="post" action="{{.Base}}/dmfiles">
-    <div class="grid">
-        <div class="column column-1">
-           FILES 
-        </div>
-        <div class="column column-1">
-            <select class="column-2 small" name="ext">
-            {{range $val := .FileExtensions}}
-                <option value="(?i)\.{{$val}}$">{{$val}}</option>
-            {{ end }}
-            </select>
-        </div>
-        <div class="column column-1">
-            <input type="hidden" name="did" value="{{.Did}}">
-            <button class="button button-small">Find</button>
-        </div>
-        <div class="column column-7">
-        </div>
-    </div>
+        Find files:
+        &nbsp;
+        <select style="height:31px" name="ext">
+        {{range $val := .FileExtensions}}
+            <option value="(?i)\.{{$val}}$">{{$val}}</option>
+        {{ end }}
+        </select>
+        &nbsp;
+        <button class="button button-small button-primary">Find</button>
     </form>
+    <hr/>
     <ul style="list-style: none;padding-left: 0;">
         {{ range .Entries }}
             {{/* Entries is a struct {Path, Name, isDir, Did, EscDid} */}}
