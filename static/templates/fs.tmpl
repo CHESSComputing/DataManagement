@@ -7,7 +7,7 @@
         &nbsp;
         <input type="hidden" name="did" value="{{.Did}}">
         <select style="height:31px" name="ext">
-            <option value="all$">all</option>
+            <option value="all">all</option>
         {{range $val := .FileExtensions}}
             {{/* the val here is file extension, e.g. .png, therefore we only escape leading dot and add cas-insensitive pattern */}}
             <option value="(?i)\{{$val}}$">{{$val}}</option>
