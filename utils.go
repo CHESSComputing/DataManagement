@@ -84,9 +84,16 @@ func findFiles(idir string, pat string) ([]string, error) {
 			log.Println("WARNING:", err)
 		}
 
-		// Check if it's a regular file and matches the pattern
-		if !info.IsDir() && re.MatchString(info.Name()) {
-			files = append(files, path)
+		if pat == "all" {
+			// get all files
+			if !info.IsDir() {
+				files = append(files, path)
+			}
+		} else {
+			// Check if it's a regular file and matches the pattern
+			if !info.IsDir() && re.MatchString(info.Name()) {
+				files = append(files, path)
+			}
 		}
 		return nil
 	})
