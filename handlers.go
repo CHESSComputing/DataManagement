@@ -39,7 +39,7 @@ func DataLocationHandler(c *gin.Context) {
 	locationAttributes := srvConfig.Config.CHESSMetaData.DataLocationAttributes
 	attr := c.Query("attr")
 	if attr != "" {
-		locationAttributes = append(locationAttributes, attr)
+		locationAttributes = []string{attr}
 	}
 
 	// Extract data location from metadata record
