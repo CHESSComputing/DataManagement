@@ -34,8 +34,16 @@ func DataLocationHandler(c *gin.Context) {
 		return
 	}
 
+	// by default use DataLocationAttributes as list of meta-data record attributes to lookup
+	// but if HTTP request provide concrete attribute switch to it
+	locationAttributes := srvConfig.Config.CHESSMetaData.DataLocationAttributes
+	attr := c.Query("attr")
+	if attr != "" {
+		locationAttributes = append(locationAttributes, attr)
+	}
+
 	// Extract data location from metadata record
-	for _, attr := range srvConfig.Config.CHESSMetaData.DataLocationAttributes {
+	for _, attr := range locationAttributes {
 		if val, ok := meta[attr]; ok {
 			// if location attribute (raw data location) is found redirect to it
 			path := val.(string)
