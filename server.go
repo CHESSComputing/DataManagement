@@ -35,16 +35,16 @@ func setupRouter() *gin.Engine {
 // helper function to setup server router for S3 backend
 func setupS3Router() *gin.Engine {
 	routes := []server.Route{
-		server.Route{Method: "GET", Path: "/data", Handler: DataLocationHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/files", Handler: DataFilesHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/storage", Handler: S3StorageHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/storage/:bucket/:object", Handler: S3StorageHandler, Authorized: true},
+		{Method: "GET", Path: "/data", Handler: DataLocationHandler, Authorized: true},
+		{Method: "GET", Path: "/files", Handler: DataFilesHandler, Authorized: true},
+		{Method: "GET", Path: "/storage", Handler: S3StorageHandler, Authorized: true},
+		{Method: "GET", Path: "/storage/:bucket/:object", Handler: S3StorageHandler, Authorized: true},
 
-		server.Route{Method: "POST", Path: "/storage/:bucket", Handler: S3PostHandler, Authorized: true, Scope: "write"},
-		server.Route{Method: "POST", Path: "/storage/:bucket/:object", Handler: S3PostHandler, Authorized: true, Scope: "write"},
+		{Method: "POST", Path: "/storage/:bucket", Handler: S3PostHandler, Authorized: true, Scope: "write"},
+		{Method: "POST", Path: "/storage/:bucket/:object", Handler: S3PostHandler, Authorized: true, Scope: "write"},
 
-		server.Route{Method: "DELETE", Path: "/storage/:bucket", Handler: S3DeleteHandler, Authorized: true, Scope: "delete"},
-		server.Route{Method: "DELETE", Path: "/storage/:bucket/:object", Handler: S3DeleteHandler, Authorized: true, Scope: "delete"},
+		{Method: "DELETE", Path: "/storage/:bucket", Handler: S3DeleteHandler, Authorized: true, Scope: "delete"},
+		{Method: "DELETE", Path: "/storage/:bucket/:object", Handler: S3DeleteHandler, Authorized: true, Scope: "delete"},
 	}
 	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
 	return r
@@ -53,16 +53,16 @@ func setupS3Router() *gin.Engine {
 // helper function to setup our server router for file-system backend
 func setupFSRouter() *gin.Engine {
 	routes := []server.Route{
-		server.Route{Method: "GET", Path: "/data", Handler: DataLocationHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/files", Handler: DataFilesHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/storage", Handler: FsStorageHandler, Authorized: true},
-		server.Route{Method: "GET", Path: "/storage/:dir/:file", Handler: FsStorageHandler, Authorized: true},
+		{Method: "GET", Path: "/data", Handler: DataLocationHandler, Authorized: true},
+		{Method: "GET", Path: "/files", Handler: DataFilesHandler, Authorized: true},
+		{Method: "GET", Path: "/storage", Handler: FsStorageHandler, Authorized: true},
+		{Method: "GET", Path: "/storage/:dir/:file", Handler: FsStorageHandler, Authorized: true},
 
-		server.Route{Method: "POST", Path: "/storage/:dir", Handler: FsPostHandler, Authorized: true, Scope: "write"},
-		server.Route{Method: "POST", Path: "/storage/:dir/:file", Handler: FsPostHandler, Authorized: true, Scope: "write"},
+		{Method: "POST", Path: "/storage/:dir", Handler: FsPostHandler, Authorized: true, Scope: "write"},
+		{Method: "POST", Path: "/storage/:dir/:file", Handler: FsPostHandler, Authorized: true, Scope: "write"},
 
-		server.Route{Method: "DELETE", Path: "/storage/:dir", Handler: FsDeleteHandler, Authorized: true, Scope: "delete"},
-		server.Route{Method: "DELETE", Path: "/storage/:dir/:file", Handler: FsDeleteHandler, Authorized: true, Scope: "delete"},
+		{Method: "DELETE", Path: "/storage/:dir", Handler: FsDeleteHandler, Authorized: true, Scope: "delete"},
+		{Method: "DELETE", Path: "/storage/:dir/:file", Handler: FsDeleteHandler, Authorized: true, Scope: "delete"},
 	}
 	r := server.Router(routes, nil, "static", srvConfig.Config.DataManagement.WebServer)
 	return r
