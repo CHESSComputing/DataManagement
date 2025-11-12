@@ -83,7 +83,7 @@ func DataLocationHandler(c *gin.Context) {
 
 				// Render HTML template
 				tmpl := server.MakeTmpl(StaticFs, "DataManagement")
-				base := srvConfig.Config.Frontend.WebServer.Base
+				base := srvConfig.Config.DataManagement.WebServer.Base
 				tmpl["Base"] = base
 				tmpl["Area"] = path
 				tmpl["Entries"] = entries
