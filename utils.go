@@ -29,7 +29,7 @@ func getFileList(did, path, spath string) ([]FileEntry, error) {
 
 	files, err := os.ReadDir(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[DataManagement.main.getFileList] os.ReadDir error: %w", err)
 	}
 
 	for _, file := range files {
@@ -56,7 +56,7 @@ func findMetaDataRecord(did string) (map[string]any, error) {
 	limit := 1
 	records, err := services.MetaDataRecords(query, skeys, sorder, idx, limit)
 	if err != nil {
-		return rec, err
+		return rec, fmt.Errorf("[DataManagement.main.findMetaDataRecord] services.MetaDataRecords error: %w", err)
 	}
 	if len(records) != 1 {
 		msg := fmt.Sprintf("multiple records found for did=%s, records=%v", did, records)
