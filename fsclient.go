@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -50,7 +51,7 @@ func (l *LocalFsClient) Get(dir, file string) ([]byte, error) {
 		files, err := l.List(dir)
 		if err != nil {
 			l.Logger.Printf("Error listing directory %s: %v", dir, err)
-			return nil, err
+			return nil, fmt.Errorf("[DataManagement.main.LocalFsClient.Get] l.List error: %w", err)
 		}
 		data, _ := json.MarshalIndent(files, "", "  ")
 		return data, nil
@@ -61,7 +62,7 @@ func (l *LocalFsClient) Get(dir, file string) ([]byte, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		l.Logger.Printf("Error reading file %s: %v", path, err)
-		return nil, err
+		return nil, fmt.Errorf("[DataManagement.main.LocalFsClient.Get] os.ReadFile error: %w", err)
 	}
 	l.Logger.Printf("Read file %s successfully", path)
 	return data, nil
@@ -73,7 +74,7 @@ func (l *LocalFsClient) List(dir string) ([]Metadata, error) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		l.Logger.Printf("Failed to list directory %s: %v", path, err)
-		return nil, err
+		return nil, fmt.Errorf("[DataManagement.main.LocalFsClient.List] os.ReadDir error: %w", err)
 	}
 
 	var metadataList []Metadata
@@ -93,12 +94,12 @@ func (l *LocalFsClient) List(dir string) ([]Metadata, error) {
 func (l *LocalFsClient) Create(dir string) error {
 	path := filepath.Join(l.Storage, dir)
 	err := os.MkdirAll(path, os.ModePerm)
-	if err == nil {
-		l.Logger.Printf("Created directory %s", path)
-	} else {
+	if err != nil {
 		l.Logger.Printf("Failed to create directory %s: %v", path, err)
+		return fmt.Errorf("[DataManagement.main.LocalFsClient.Create] os.MkdirAll error: %w", err)
 	}
-	return err
+	l.Logger.Printf("Created directory %s", path)
+	return nil
 }
 
 // Upload writes data to a file in chunks to handle large files efficiently
@@ -108,26 +109,26 @@ func (l *LocalFsClient) Upload(dir, file, ctype string, reader io.Reader, size i
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil {
 		l.Logger.Printf("Failed to create directory for file %s: %v", path, err)
-		return err
+		return fmt.Errorf("[DataManagement.main.LocalFsClient.Upload] os.MkdirAll error: %w", err)
 	}
 
 	// Open the file for writing
 	outFile, err := os.Create(path)
 	if err != nil {
 		l.Logger.Printf("Failed to create file %s: %v", path, err)
-		return err
+		return fmt.Errorf("[DataManagement.main.LocalFsClient.Upload] os.Create error: %w", err)
 	}
 	defer outFile.Close()
 
 	// Copy data from reader to file using buffer
 	buffer := make([]byte, 4096) // 4KB buffer
 	_, err = io.CopyBuffer(outFile, reader, buffer)
-	if err == nil {
-		l.Logger.Printf("Uploaded file %s successfully", path)
-	} else {
+	if err != nil {
 		l.Logger.Printf("Failed to upload file %s: %v", path, err)
+		return fmt.Errorf("[DataManagement.main.LocalFsClient.Create] os.CopyBuffer error: %w", err)
 	}
-	return err
+	l.Logger.Printf("Uploaded file %s successfully", path)
+	return nil
 }
 
 // Delete removes a file or an entire directory if file is empty
@@ -137,23 +138,23 @@ func (l *LocalFsClient) Delete(dir, file string) error {
 	// If file is empty, delete the entire directory
 	if file == "" {
 		err := os.RemoveAll(path)
-		if err == nil {
-			l.Logger.Printf("Deleted directory %s", path)
-		} else {
+		if err != nil {
 			l.Logger.Printf("Failed to delete directory %s: %v", path, err)
+			return fmt.Errorf("[DataManagement.main.LocalFsClient.Delete] os.RemoveAll error: %w", err)
 		}
-		return err
+		l.Logger.Printf("Deleted directory %s", path)
+		return nil
 	}
 
 	// Otherwise, delete the specific file
 	path = filepath.Join(path, file)
 	err := os.Remove(path)
-	if err == nil {
-		l.Logger.Printf("Deleted file %s", path)
-	} else {
+	if err != nil {
 		l.Logger.Printf("Failed to delete file %s: %v", path, err)
+		return fmt.Errorf("[DataManagement.main.LocalFsClient.Delete] os.MkdirAll error: %w", err)
 	}
-	return err
+	l.Logger.Printf("Deleted file %s", path)
+	return nil
 }
 
 /*

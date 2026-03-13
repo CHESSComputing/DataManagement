@@ -97,8 +97,11 @@ func findFiles(idir string, pat string) ([]string, error) {
 		}
 		return nil
 	})
+	if err != nil {
+		return files, fmt.Errorf("[DataManagement.main.findFiles] filepath.Walk error: %w", err)
+	}
 
-	return files, err
+	return files, nil
 }
 
 // fileExtensions finds all unique file extensions in the given directory and subdirectories.
