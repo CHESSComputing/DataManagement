@@ -23,6 +23,11 @@ type FileEntry struct {
 	Path   string `json:"path"` // path here correspond to sub-path within raw location area
 }
 
+func (e FileEntry) IsViewable() bool {
+	lower := strings.ToLower(e.Name)
+	return strings.HasSuffix(lower, ".h5") || strings.HasSuffix(lower, ".nxs")
+}
+
 // getFileList returns a list of files and directories in the given path
 func getFileList(did, path, spath string) ([]FileEntry, error) {
 	var entries []FileEntry

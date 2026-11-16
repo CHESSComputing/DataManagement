@@ -26,7 +26,10 @@
                     <a href="/dm?did={{.EscDid}}&path={{.Path}}" style="font-weight: bold; color: blue; cursor: pointer;">{{ .Name }}</a>
                 {{ else }}
                     <img src="https://cdn.onlinewebfonts.com/svg/img_547367.png" width="20">
-                    <a href="/dm?did={{.EscDid}}&file={{.Name}}" style="color: black; cursor: pointer;">{{ .Name }}</a>
+                    <a href="/dm?did={{.EscDid}}&file={{.Path}}" style="color: black; cursor: pointer;">{{ .Name }}</a>
+                    {{ if and .IsViewable $.NexusViewerUrl }}
+                      (view in NeXus browser: <a href="{{$.NexusViewerUrl}}/view?file={{$.Area}}/{{.Name}}" style="color: black; cursor: pointer;">link</a>)
+                    {{ end }}
                 {{ end }}
             </li>
         {{ end }}

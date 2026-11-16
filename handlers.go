@@ -89,6 +89,7 @@ func DataLocationHandler(c *gin.Context) {
 				tmpl["Entries"] = entries
 				tmpl["Did"] = did
 				tmpl["FileExtensions"] = fileExtensions(path)
+				tmpl["NexusViewerUrl"] = srvConfig.Config.NexusViewerURL
 				content := server.TmplPage(StaticFs, "fs.tmpl", tmpl)
 				page := server.Header(StaticFs, base) + content + server.FooterEmpty(StaticFs, base)
 				c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(page))
