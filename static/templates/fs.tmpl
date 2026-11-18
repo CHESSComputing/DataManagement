@@ -28,7 +28,15 @@
                     <img src="https://cdn.onlinewebfonts.com/svg/img_547367.png" width="20">
                     <a href="/dm?did={{.EscDid}}&file={{.Path}}" style="color: black; cursor: pointer;">{{ .Name }}</a>
                     {{ if and .IsViewable $.NexusViewerUrl }}
-                      (view in NeXus browser: <a href="{{$.NexusViewerUrl}}/view?file={{$.Area}}/{{.Name}}" style="color: black; cursor: pointer;">link</a>)
+                      {{ $fileVal := print $.Area "/" .Name }}
+                      (view in NeXus browser:
+                       <form id="nexus-form-{{ .Name }}" action="{{ $.NexusViewerUrl }}/viewform" method="POST" style="display:inline;">
+                       <input type="hidden" name="file" value="{{ $fileVal }}">
+                       <input type="hidden" name="did" value="{{ $.Did }}">
+                       <input type="hidden" name="token" value="{{ $.Token }}">
+                       <a href="#" onclick="document.getElementById('nexus-form-{{ .Name }}').submit(); return false;" style="color: black; cursor: pointer; text-decoration: underline;">link</a>
+                       </form>
+                      )
                     {{ end }}
                 {{ end }}
             </li>

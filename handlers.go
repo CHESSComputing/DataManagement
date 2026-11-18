@@ -81,10 +81,14 @@ func DataLocationHandler(c *gin.Context) {
 					return
 				}
 
+				token, user, _ := server.GetAuthTokenUser(c)
+
 				// Render HTML template
 				tmpl := server.MakeTmpl(StaticFs, "DataManagement")
 				base := srvConfig.Config.DataManagement.WebServer.Base
 				tmpl["Base"] = base
+				tmpl["Token"] = token
+				tmpl["User"] = user
 				tmpl["Area"] = path
 				tmpl["Entries"] = entries
 				tmpl["Did"] = did
